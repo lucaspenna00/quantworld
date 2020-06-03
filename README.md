@@ -5,4 +5,4 @@ quantitative finance:
 - Deep Reinforcement Learning
 - Classic Technical Features
 - Feature Extraction (PCA, Autoencoders, etc)
-- DSP
+- Digital Signal Processing
