@@ -1,5 +1,4 @@
 import pandas as pd
-from sklearn.metrics import r2_score
 
 def conta_segundos(instante, secs):
     
