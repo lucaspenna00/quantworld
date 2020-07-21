@@ -1,4 +1,5 @@
 import pandas as pd
+from sklearn.metrics import r2_score
 
 def conta_segundos(instante, secs):
     
@@ -44,30 +45,32 @@ def purgeKfold(X, Y, purge, k, score_metric, scaler, model):
 
     metrics = []
 
+    Y = pd.DataFrame(Y)
+
     for i in range(1, k+1):
 
-    X['index_aux'] = range(0, X.shape[0])
-    Y['index_aux'] = range(0, Y.shape[0])
+        X['index_aux'] = range(0, X.shape[0])
+        Y['index_aux'] = range(0, Y.shape[0])
 
-    print("[INFO] Iteration: "+str(i))
+        print("[INFO] Iteration: "+str(i))
 
         if i == 1:
 
-            X_test = X[(X['index_aux'] < int(i*(1/k)*X.shape[0]))]
-            X_train = X[(X['index_aux'] > int(i*(1/k)*X.shape[0]))]
+            X_test = X[(X['index_aux'] < (i*(1/k)*X.shape[0]))]
+            X_train = X[(X['index_aux'] > (i*(1/k)*X.shape[0]))]
 
-            Y_test = Y[:int(i*(1/k)*Y.shape[0])]
-            Y_train = Y[int(i*(1/k)*Y.shape[0]):]
+            Y_test = Y[ Y['index_aux'] < (i*(1/k)*Y.shape[0])]
+            Y_train = Y[ Y['index_aux'] > (i*(1/k)*Y.shape[0])]
 
             ## -- Executando o Purge em cima dos dados
 
-            X_train = X_train[ X_train.index > conta_segundos(str(X_train.index[0]), purge) ] # > first_date + purge
+            X_train = X_train[ X_train.index > conta_segundos(X_train.index[0], purge) ] # > first_date + purge
 
-            X_test = X_test [ X_test.index < conta_segundos(str(X_test.index[-1], -purge) ] # < last_date - purge
+            X_test = X_test[ X_test.index < conta_segundos(X_train.index[0], -purge) ] # < last_date - purge
 
-            Y_train = Y_train[ Y_train.index > conta_segundos(str(Y_train.index[0]), purge) ] # > first_date + purge
+            Y_train = Y_train[ Y_train.index > conta_segundos(Y_train.index[0], purge) ] # > first_date + purge
 
-            Y_test = Y_test[ Y_test.index > conta_segundos(str(Y_test.index[0]), purge) ] # < last_date - purge
+            Y_test = Y_test[ Y_test.index < conta_segundos(Y_train.index[0], -purge) ] # < last_date - purge
 
             # Eliminando os index aux
 
@@ -110,24 +113,23 @@ def purgeKfold(X, Y, purge, k, score_metric, scaler, model):
         
         if (i != 1) and (i != K):
 
-            X_train = X[ (X['index_aux'] < int(i*(1/k)*X.shape[0])) & (X['index_aux'] > int((i+1)*(1/k)*X.shape[0])) ]
+            X_train = X[ (X['index_aux'] < ((i-1)*(1/k)*X.shape[0])) & (X['index_aux'] > (i*(1/k)*X.shape[0])) ]
 
-            X_test = X[ (X['index_aux'] > int(i*(1/k)*X.shape[0])) & (X['index_aux'] < int((i+1)*(1/k)*X.shape[0])) ]
+            X_test = X[ (X['index_aux'] > ((i-1)*(1/k)*X.shape[0])) & (X['index_aux'] < (i*(1/k)*X.shape[0])) ]
 
-            Y_train = Y[ (Y['index_aux'] < int(i*(1/k)*Y.shape[0])) & (Y['index_aux'] > int((i+1)*(1/k)*Y.shape[0])) ]
+            Y_train = Y[ (Y['index_aux'] < ((i-1)*(1/k)*Y.shape[0])) & (Y['index_aux'] > (i*(1/k)*Y.shape[0])) ]
 
-            Y_test = Y[ (Y['index_aux'] > int(i*(1/k)*Y.shape[0])) & (Y['index_aux'] < int((i+1)*(1/k)*Y.shape[0])) ]
+            Y_test = Y[ (Y['index_aux'] > ((i-1)*(1/k)*Y.shape[0])) & (Y['index_aux'] < (i*(1/k)*Y.shape[0])) ]
 
             ## -- Executando o Purge em cima dos dados
 
-            X_train = X_train[ (X_train.index < conta_segundos(str(X_test.index[0]), -purge)) & (X_train.index > conta_segundos(str(X_test.index[-1]), purge)) ] 
+            X_train = X_train[ (X_train.index < conta_segundos(X_test.index[0], -purge)) & (X_train.index > conta_segundos(X_test.index[-1], purge)) ] 
             
-            X_test = X_test[ (X_test.index > conta_segundos(str(X_test.index[0]), purge)) & (X_test.index < conta_segundos(str(X_test.index[-1]), -purge)) ]
+            X_test = X_test[ (X_test.index > conta_segundos(X_test.index[0], purge)) & (X_test.index < conta_segundos(X_test.index[-1], -purge)) ]
 
-            Y_train = Y_train[ (Y_train.index < conta_segundos(str(X_test.index[0]), -purge)) & (Y_train.index > conta_segundos(str(X_test.index[-1]), purge)) ]
+            Y_train = Y_train[ (Y_train.index < conta_segundos(X_test.index[0], -purge)) & (Y_train.index > conta_segundos(X_test.index[-1], purge)) ]
 
-            Y_test = Y_test[ (Y_test.index > conta_segundos(str(X_test.index[0]), purge)) & (Y_test.index < conta_segundos(str(X_test.index[-1]), -purge)) ]
-
+            Y_test = Y_test[ (Y_test.index > conta_segundos(X_test.index[0], purge)) & (Y_test.index < conta_segundos(X_test.index[-1], -purge)) ]
             ## -- Eliminando os index aux
 
             X_train.drop(["index_aux"], axis=1, inplace=True)
@@ -169,19 +171,19 @@ def purgeKfold(X, Y, purge, k, score_metric, scaler, model):
 
         if i == K:
 
-            X_train = X[ X['index_aux'] < int((i-1)*(1/k)*X.shape[0]) ]
+            X_train = X[ X['index_aux'] < ((i-1)*(1/k)*X.shape[0]) ]
 
-            X_test = X[ X['index_aux'] > int((i-1)*(1/k)*X.shape[0]) ]
+            X_test = X[ X['index_aux'] > ((i-1)*(1/k)*X.shape[0]) ]
 
-            Y_train = Y[ Y['index_aux'] < int((i-1)*(1/k)*Y.shape[0]) ]
+            Y_train = Y[ Y['index_aux'] < ((i-1)*(1/k)*Y.shape[0]) ]
 
-            Y_test = Y[ Y['index_aux'] > int((i-1)*(1/k)*Y.shape[0]) ]
+            Y_test = Y[ Y['index_aux'] > ((i-1)*(1/k)*Y.shape[0]) ]
 
             ## -- Executando o Purge em cima dos dados
 
-            X_train = X_train[ X_train.index < conta_segundos(str(X_test.index[0]), -purge) ]
+            X_train = X_train[ X_train.index < conta_segundos((X_test.index[0]), -purge) ]
 
-            X_test = X_test[ X_test.index > conta_segundos(str(X_test.index[0]), purge) ]
+            X_test = X_test[ X_test.index > conta_segundos((X_test.index[0]), purge) ]
 
 
             ## -- Eliminando os index aux
@@ -224,6 +226,16 @@ def purgeKfold(X, Y, purge, k, score_metric, scaler, model):
             #
 
     return metrics
+
+
+
+
+            
+
+
+
+
+
 
 
 
