@@ -146,19 +146,6 @@ def purgeKfold(X, Y, purge, k, score_metric, scaler, model):
             print("[INFO] Y_test.shape: ", Y_test.shape)
             print("[INFO] Y_train.shape: ", Y_train.shape)
 
-            print(Y_train.index[0])
-            print(X_train.index[0])
-
-            print(Y_train.index[-1])
-            print(X_train.index[-1])
-
-
-            print(Y_test.index[0])
-            print(X_test.index[0])
-    
-            print(Y_test.index[-1])
-            print(X_test.index[-1])
-
             ## -- Escalando os dados
 
             if scaler != None:
