@@ -7,45 +7,44 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn import svm
 from scipy.stats import spearmanr
 
-def get_feature_importance(X, Y, scaler):
+def get_feature_importance(X, Y, scaler, controle):
 
-    features = X.columns
+    if controle == True:
 
-    X['controle'] = np.random.normal(0, 1, X.shape[0])
+        X['controle'] = np.random.normal(0, 1, X.shape[0])
 
     features_behaviour = pd.DataFrame()
 
     # -------- Pearson ------------
 
-    features_behaviour['features'] = features
+    features_behaviour['features'] = X.columns
 
     corr = []
 
     for feature in X.columns:
         
-        corr.append(np.corrcoef(X[feature], Y)[0][1])
+        corr.append(np.corrcoef(X[feature], Y)[1][0])
 
     features_behaviour['pearson'] = corr
+
+    print(features_behaviour.head(1000))
 
     # -------- XGBoost ------------
     
     model = XGBRegressor(n_jobs=-1, n_estimators=100)
+
+    print(X.columns)
     
     model.fit(X, Y)
 
-    feature_important = model.get_booster().get_score()
-
-    keys = list(feature_important.keys())
-
-    values = list(feature_important.values())
-
-    data = pd.DataFrame(data=values, index=keys, columns=["score"]).sort_values(by = "score", ascending=False)
-
     xgbl = []
+
+    i=0
 
     for feature in X.columns:
         
-        xgbl.append(data.loc[feature]['score'])
+        xgbl.append(model.feature_importances_[i])
+        i=i+1
         
     features_behaviour['xgboost_reg_score'] = xgbl
 
@@ -53,7 +52,7 @@ def get_feature_importance(X, Y, scaler):
 
     # -------- Lasso ------------
 
-    lasso = (Lasso(alpha=0.05))
+    lasso = (Lasso(alpha=0.1))
 
     lasso.fit(X_esc, Y)
 
@@ -72,7 +71,7 @@ def get_feature_importance(X, Y, scaler):
 
     lr = LinearRegression()
 
-    lr.fit(X_esc, Y)
+    lr.fit(X, Y)
 
     lr_coef = []
 
@@ -106,6 +105,8 @@ def get_feature_importance(X, Y, scaler):
 
     svr = svm.LinearSVR()
 
+    svr.fit(X_esc, Y)
+
     svr_coef = []
 
     i=0
@@ -127,4 +128,4 @@ def get_feature_importance(X, Y, scaler):
         
     features_behaviour['spearmanr'] = sp_corr
 
-    return features_behaviour                          
+    return features_behaviour
