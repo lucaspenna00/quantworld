@@ -12,7 +12,3 @@ def scatter_heat_map(x, y, title):
     plt.title(title)
     plt.show()
     print("Correlação de Pearson: ", np.corrcoef(x, y)[0][1])
-    
-
-    
-  
