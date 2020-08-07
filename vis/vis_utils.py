@@ -8,6 +8,7 @@ def scatter_heat_map(x, y, title):
     z = gaussian_kde(xy)(xy)
     plt.figure()
     plt.scatter(x, y, marker='o', c=z, edgecolor='')
+    plt.colorbar()
     plt.title(title)
     plt.show()
     print("Correlação de Pearson: ", np.corrcoef(x, y)[0][1])
