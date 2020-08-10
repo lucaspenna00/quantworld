@@ -1,10 +1,12 @@
+import pandas as pd
+import numpy as np
+
 def get_denoise_fourier_transform(df, n_components, label='returns'):
 
     '''
     Calculate fourier transform, select the n_components most relevant components and then calculate the inverse fourier transform.
-    Note que pode haver algumas imprecisões 
     '''
-
+    
     returns_fourier = np.fft.fft(np.asarray(df[label].tolist()))
 
     fft_df = pd.DataFrame({'fft': returns_fourier})
