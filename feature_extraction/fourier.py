@@ -21,6 +21,6 @@ def get_denoise_fourier_transform(df, n_components, label='returns'):
 
     fft_list_m10[n_components:-n_components]=0
 
-    df['n:'+str(n_components)+'-fourier'] = np.fft.ifft(fft_list_m10)                                                                    
+    df['n:'+str(n_components)+'-fourier'] = np.real(np.fft.ifft(fft_list_m10))                                                                    
 
     return df
