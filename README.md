@@ -11,6 +11,9 @@ quantitative finance:
 
 ** Notes **
 Instalar talib:
+
 https://www.lfd.uci.edu/~gohlke/pythonlibs/
+
 download o TA_Lib-0.4.18-cp37-cp37m-win_amd64.whl (se tiver usando python 3.7, se nao mudar o cp38, cp39 de acordo com versao python)
+
 pip install TA_Lib-0.4.18-cp37-cp37m-win_amd64.whl
